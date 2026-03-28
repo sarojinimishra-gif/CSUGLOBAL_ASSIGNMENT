@@ -1,0 +1,179 @@
+#Class to store course details.
+class Course:
+    def __init__(self, course_number, room_number, instructor, meeting_time):
+        self.course_number = course_number
+        self.room_number = room_number
+        self.instructor = instructor
+        self.meeting_time = meeting_time
+
+    def display_details(self):
+        print("\nCourse Details")
+        print("-------------------------------------")
+        print(f"Course Number : {self.course_number}")
+        print(f"Room Number   : {self.room_number}")
+        print(f"Instructor    : {self.instructor}")
+        print(f"Meeting Time  : {self.meeting_time}")
+
+#Class to manage all course records
+class CourseManager():
+    def __init__(self):
+        self.room_dict = {}
+        self.instructor_dict = {}
+        self.meeting_dict = {}
+        self.course_list = []
+        self.max_courses = 5
+
+    #Method to take input for 5 courses from the user
+    def load_courses_from_user(self):
+        print("Enter details for 5 courses:")
+        print("----------------------------")
+        count = 0
+        while count < self.max_courses :
+            print(f"Course {count + 1}")
+            #Course number input
+            while True:
+                try:
+                    course_number = input("Enter course number: ").upper().strip()
+                    if course_number == "":
+                        raise ValueError("Course number cannot be empty.")
+                    if course_number in self.course_list:
+                        raise ValueError("Duplicate course number is not allowed.")
+                    break
+                except ValueError as e:
+                    print(f"Error: {e} Please enter again.")
+
+            #Room number input
+            while True:
+                try:
+                    room_number = input("Enter room number: ").strip()
+                    if room_number == "":
+                        raise ValueError("Room number cannot be empty.")
+                    if not room_number.isdigit():
+                        raise ValueError("Room number must contain only digits.")
+                    if room_number in self.room_dict.values():
+                        raise ValueError("This room number is already assigned to another course.")
+                    break
+                except ValueError as e:
+                    print(f"Error: {e} Please enter again.")
+
+            #Instructor input
+            while True:
+                try:
+                    instructor = input("Enter instructor name: ").strip()
+                    if instructor == "":
+                        raise ValueError("Instructor name cannot be empty.")
+                    if not instructor.replace(" ", "").isalpha():
+                        raise ValueError("Instructor name should contain only letters.")
+                    break
+                except ValueError as e:
+                    print(f"Error: {e} Please enter again.")
+
+            #Meeting time input
+            while True:
+                try:
+                    meeting_time = input("Enter meeting time: ").strip()
+                    if meeting_time == "":
+                        raise ValueError("Meeting time cannot be empty.")
+                    if ":" not in meeting_time:
+                        raise ValueError("Meeting time must be in proper format like 8:00 a.m.")
+                    break
+                except ValueError as e:
+                    print(f"Error: {e} Please enter again.")
+
+            self.room_dict[course_number] = room_number
+            self.instructor_dict[course_number] = instructor
+            self.meeting_dict[course_number] = meeting_time
+            self.course_list.append(course_number)
+
+            count += 1
+
+
+    #Method to display all available courses
+    def display_available_courses(self):
+        print("\nAvailable Courses")
+        print("-------------------")
+        for i in range(len(self.course_list)):
+            print(f"{i+1}. {self.course_list[i]}")
+
+    #Method to display all course records
+    def display_all_courses(self):
+        print("\nAll Course Records")
+        print("-------------------------------------")
+        for course_number in self.course_list:
+            print(f"\nCourse Number : {course_number}")
+            print(f"Room Number   : {self.room_dict[course_number]}")
+            print(f"Instructor    : {self.instructor_dict[course_number]}")
+            print(f"Meeting Time  : {self.meeting_dict[course_number]}")
+
+    def is_valid_course(self, course_number):
+        return course_number in self.course_list
+
+    def get_course(self, course_number):
+        course = Course(course_number,
+                      self.room_dict[course_number],
+                      self.instructor_dict[course_number],
+                      self.meeting_dict[course_number])
+        return course
+
+#Main class
+class CourseApp():
+    def __init__(self):
+        self.obj = CourseManager()
+
+    def menu(self):
+        print("\nMenu")
+        print("1. Display available courses")
+        print("2. Search a course")
+        print("3. Display all course records")
+        print("4. Exit")
+
+    def load_and_run(self):
+        try:
+            self.obj.load_courses_from_user()
+            self.obj.display_available_courses()
+
+            while True:
+                try:
+                    self.menu()
+                    choice = input("\nEnter your choice: ").strip()
+
+                    if choice == "1":
+                        self.obj.display_available_courses()
+
+                    elif choice == "2":
+                        user_course = input("\nEnter a course number to view details: ").upper().strip()
+
+                        if user_course == "":
+                            raise ValueError("Input cannot be empty.")
+
+                        if not self.obj.is_valid_course(user_course):
+                            raise KeyError("Invalid course number.")
+
+                        selected_course = self.obj.get_course(user_course)
+                        selected_course.display_details()
+
+                    elif choice == "3":
+                        self.obj.display_all_courses()
+
+                    elif choice == "4":
+                        print("Exiting program...")
+                        break
+
+                    else:
+                        print("Invalid choice. Please select from 1 to 4.")
+
+                except ValueError as e:
+                    print(f"Error: {e}")
+
+                except KeyError:
+                    print("Error: Course not found. Please choose a valid course number from the list.")
+
+                except Exception as e:
+                    print(f"Unexpected error: {e}")
+
+        except Exception as e:
+            print(f"Program error: {e}")
+
+if __name__ == "__main__":
+    app = CourseApp()
+    app.load_and_run()
